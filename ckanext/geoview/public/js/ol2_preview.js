@@ -141,6 +141,10 @@
 
                 var url = proxyServiceUrl || getMapUrl;
 
+                url = String(url);
+                //var url = getMapUrl;
+                if (url == 'true') url = getMapUrl;
+
                 var layerName = parsedUrl.length > 1 && parsedUrl[1];
                 OL_HELPERS.withWMSLayers(url, getMapUrl, layerProcessor, layerName);
             },
@@ -250,10 +254,30 @@
                     if (urls.indexOf('${x}') === -1) {
                       urls = urls.replace('{x}', '${x}').replace('{y}', '${y}').replace('{z}', '${z}');
                     }
-                    baseMapLayer = new OpenLayers.Layer.XYZ('Base Layer', urls, {
+                    baseMapLayer = new OpenLayers.Layer.OSM('地理院地図（グレー）', urls, {
                         sphericalMercator: true,
                         wrapDateLine: true,
-                        attribution: mapConfig.attribution
+                        opacity: 1.0,
+                        attribution: mapConfig.attribution,
+                        eventListeners: {
+                                tileloaded: function(evt) {
+                                        //コンテキスト取得
+                                        var ctx = evt.tile.getCanvasContext();
+                                        if (ctx) {
+                                                var imgd = ctx.getImageData(0, 0, evt.tile.size.w, evt.tile.size.h);
+                                                var data = imgd.data; //イメージデータ取得
+
+                                                for (var i = 0, n = data.length; i < n; i += 4) {
+                                                        //ＲＧＢの平均値を算出
+                                                        avec=(data[i]+data[i+1]+data[i+2])/3;
+                                                        data[i] = data[i + 1] = data[i + 2] = data[3] = avec;
+                                                }
+                                                ctx.putImageData(imgd, 0, 0);
+                                                //data URI scheme化してimgのsrcに渡す
+                                                evt.tile.imgDiv.src = ctx.canvas.toDataURL();　
+                                        }
+                                }
+                        }
                     });
                 } else {
                     // MapQuest OpenStreetMap base map
@@ -283,7 +307,37 @@
 
                 // Choose base map based on CKAN wide config
                 var baseMapLayer = this._commonBaseLayer(this.options.map_config);
-                var clearBaseLayer = new OpenLayers.Layer.OSM("None", "/img/blank.gif", {isBaseLayer: true, attribution: ''});
+                var clearBaseLayer = new OpenLayers.Layer.OSM("None", "/s1/ckan/img/blank.gif", {isBaseLayer: true, attribution: ''});
+
+                var baseMapLayer2 = new OpenLayers.Layer.OSM("地理院地図（カラー）",
+                                    "http://cyberjapandata.gsi.go.jp/xyz/std/${z}/${x}/${y}.png", {
+                                    attribution: "<a href='http://portal.cyberjapan.jp/help/termsofuse.html' target='_blank'>国土地理院 標準地図</a>",opacity: 1.0
+                                    });
+
+                var baseMapLayer3 = new OpenLayers.Layer.OSM("地理院地図（淡色）",
+                                    "http://cyberjapandata.gsi.go.jp/xyz/pale/${z}/${x}/${y}.png", {
+                                    attribution: "<a href='http://portal.cyberjapan.jp/help/termsofuse.html' target='_blank'>国土地理院　淡色地図</a>",opacity: 1.0,
+                                    });
+
+                var baseMapLayer4 = new OpenLayers.Layer.OSM("国土地理院 航空写真",
+                                    "http://cyberjapandata.gsi.go.jp/xyz/ort/${z}/${x}/${y}.jpg", {
+                                    attribution: "<a href='http://portal.cyberjapan.jp/help/termsofuse.html' target='_blank'>国土地理院　航空写真</a>",opacity: 1.0,
+                                    });
+
+                var baseMapLayer5 = new OpenLayers.Layer.OSM("国土地理院 色別標高図",
+                                    "http://cyberjapandata.gsi.go.jp/xyz/relief/${z}/${x}/${y}.png", {
+                                    attribution: "<a href='http://portal.cyberjapan.jp/help/termsofuse.html' target='_blank'>国土地理院　色別標高図</a>",opacity: 1.0,
+                                    eventListeners: {
+                                        loadstart: function(evt) {
+                                            var tZoom = this.map.getZoom();
+                                            if(tZoom<6){this.map.zoomTo(6);}
+                                            if(tZoom>15){this.map.zoomTo(15);}
+                                        }
+                                    }
+                                    });
+
+                var baseMapLayer6 = new OpenLayers.Layer.Stamen("toner");
+                var baseMapLayer7 = new OpenLayers.Layer.OSM();
 
                 var mapDiv = $("<div></div>").attr("id", "map").addClass("map")
                 var info = $("<div></div>").attr("id", "info")
@@ -302,8 +356,9 @@
                 this.map = new OpenLayers.Map(
                     {
                         div: "map",
-                        theme: "/js/vendor/openlayers2/theme/default/style.css",
-                        layers: [baseMapLayer, clearBaseLayer],
+                        theme: "/s1/ckan/js/vendor/openlayers2/theme/default/style.css",
+                    //    layers: [baseMapLayer, clearBaseLayer],
+                        layers: [baseMapLayer,clearBaseLayer ,baseMapLayer2, baseMapLayer3, baseMapLayer4, baseMapLayer5, baseMapLayer6, baseMapLayer7],
                         maxExtent: baseMapLayer.getMaxExtent()
                         //projection: Mercator, // this is needed for WMS layers (most only accept 3857), but causes WFS to fail
                     });
@@ -334,4 +389,4 @@
         }
     });
 })();
-OpenLayers.ImgPath = '/js/vendor/openlayers2/img/';
+OpenLayers.ImgPath = '/s1/ckan/js/vendor/openlayers2/img/';

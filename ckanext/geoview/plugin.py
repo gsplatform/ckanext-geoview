@@ -110,24 +110,40 @@ class OLGeoView(GeoViewBase):
                 }
 
     def can_view(self, data_dict):
-        format_lower = data_dict['resource'].get('format', '').lower()
-        same_domain = on_same_domain(data_dict)
+         
+        # add1112
+        resource = data_dict['resource']
+        format_lower = resource['format'].lower()
 
-        # Guess from file extension
-        if not format_lower and data_dict['resource'].get('url'):
-            format_lower = self._guess_format_from_extension(
-                data_dict['resource']['url'])
+        if not format_lower:
+            format_lower = 'dummy'
+        
+        view_formats = GEOVIEW_FORMATS
 
-        view_formats = config.get('ckanext.geoview.ol_viewer.formats', '')
-        if view_formats:
-            view_formats.split(' ')
-        else:
-            view_formats = GEOVIEW_FORMATS
-
-        correct_format = format_lower in view_formats
         can_preview_from_domain = self.proxy_enabled or same_domain
 
-        return correct_format and can_preview_from_domain
+        if format_lower in view_formats:
+            return can_preview_from_domain
+        return False
+
+#        format_lower = data_dict['resource'].get('format', '').lower()
+#        same_domain = on_same_domain(data_dict)
+#
+#        # Guess from file extension
+#        if not format_lower and data_dict['resource'].get('url'):
+#            format_lower = self._guess_format_from_extension(
+#                data_dict['resource']['url'])
+#
+#        view_formats = config.get('ckanext.geoview.ol_viewer.formats', '')
+#        if view_formats:
+#            view_formats.split(' ')
+#        else:
+#            view_formats = GEOVIEW_FORMATS
+#
+#        correct_format = format_lower in view_formats
+#        can_preview_from_domain = self.proxy_enabled or same_domain
+#
+#        return correct_format and can_preview_from_domain
 
     def view_template(self, context, data_dict):
         return 'dataviewer/openlayers2.html'

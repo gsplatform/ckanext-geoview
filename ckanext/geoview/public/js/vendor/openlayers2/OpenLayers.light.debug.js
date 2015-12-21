@@ -8009,6 +8009,13 @@ OpenLayers.Map = OpenLayers.Class({
 
                 // set new baselayer
                 this.baseLayer = newBaseLayer;
+
+                // ズームレベルの制限
+                var tflg = false;
+                if(this.baseLayer.minZoomLevel != undefined)
+                { if(this.baseLayer.minZoomLevel > this.zoom) { this.zoom = this.baseLayer.minZoomLevel; tflg=true; }}
+                if(this.baseLayer.maxZoomLevel != undefined)
+                { if(this.baseLayer.maxZoomLevel < this.zoom) { this.zoom = this.baseLayer.maxZoomLevel; tflg=true; }}
                 
                 if(!this.allOverlays || this.baseLayer.visibility) {
                     this.baseLayer.setVisibility(true);
@@ -8025,6 +8032,7 @@ OpenLayers.Map = OpenLayers.Class({
                     var newZoom = this.getZoomForResolution(
                         newResolution || this.resolution, true
                     );
+                    if(tflg){newZoom = this.zoom;}
                     // zoom and force zoom change
                     this.setCenter(center, newZoom, false, true);
                 }
@@ -9106,6 +9114,13 @@ OpenLayers.Map = OpenLayers.Class({
         // xy - {<OpenLayers.Pixel>} optional zoom origin
         
         var map = this;
+    
+        //ズームレベルの制限
+        if(map.baseLayer.minZoomLevel != undefined)
+        { if(map.baseLayer.minZoomLevel > zoom) {zoom = map.baseLayer.minZoomLevel;}}
+        if(map.baseLayer.maxZoomLevel != undefined)
+        { if(map.baseLayer.maxZoomLevel < zoom) {zoom = map.baseLayer.maxZoomLevel;}}
+
         if (map.isValidZoomLevel(zoom)) {
             if (map.baseLayer.wrapDateLine) {
                 zoom = map.adjustZoom(zoom);
@@ -9139,6 +9154,12 @@ OpenLayers.Map = OpenLayers.Class({
                                 map.applyTransform();
                                 var resolution = map.getResolution() / data.scale,
                                     zoom = map.getZoomForResolution(resolution, true)
+                            
+                                //ズームレベルの制限
+                                if(map.baseLayer.minZoomLevel != undefined)
+                                { if(map.baseLayer.minZoomLevel > zoom) {zoom = map.baseLayer.minZoomLevel;}}
+                                if(map.baseLayer.maxZoomLevel != undefined)
+                                { if(map.baseLayer.maxZoomLevel < zoom) {zoom = map.baseLayer.maxZoomLevel;}}                                
                                 map.moveTo(map.getZoomTargetCenter(xy, resolution), zoom, true);
                             }
                         }
@@ -15357,7 +15378,7 @@ OpenLayers.Layer.HTTPRequest = OpenLayers.Class(OpenLayers.Layer, {
      * 
      * Parameters:
      * name - {String}
-     * url - {Array(String) or String}
+     * lrl - {Array(String) or String}
      * params - {Object}
      * options - {Object} Hashtable of extra options to tag onto the layer
      */
@@ -16043,6 +16064,13 @@ OpenLayers.Tile.Image = OpenLayers.Class(OpenLayers.Tile, {
         } else {
             // synchronous image requests get the url immediately.
             this.url = this.layer.getURL(this.bounds);
+
+            var img = new Image();
+            img.src = this.url;
+  
+            //var tflg = fileExists(this.url);            
+ 
+            if(img.height>0){this.initImage();}
             this.initImage();
         }
     },
@@ -16061,11 +16089,15 @@ OpenLayers.Tile.Image = OpenLayers.Class(OpenLayers.Tile, {
         if (this.layer instanceof OpenLayers.Layer.Grid) {
             ratio = this.layer.getServerResolution() / this.layer.map.getResolution();
         }
+        //var tt = this.imgDiv.className;
+        //if(tt != "olTileImage olImageLoadError")
+        //{
         style.left = this.position.x + "px";
         style.top = this.position.y + "px";
         style.width = Math.round(ratio * size.w) + "px";
         style.height = Math.round(ratio * size.h) + "px";
-    },
+        //}
+     },
 
     /** 
      * Method: clear
@@ -16148,6 +16180,12 @@ OpenLayers.Tile.Image = OpenLayers.Class(OpenLayers.Tile, {
      * Creates the content for the frame on the tile.
      */
     initImage: function() {
+       
+    //    var chkimg = new Image();
+    //    chkimg.src = this.url;
+    //    if( chkimg.height == 0 )
+    //    { this.isLoading = false; return;}
+
         if (!this.url && !this.imgDiv) {
             // fast path out - if there is no tile url and no previous image
             this.isLoading = false;
@@ -16174,7 +16212,7 @@ OpenLayers.Tile.Image = OpenLayers.Class(OpenLayers.Tile, {
                 OpenLayers.Function.bind(this.onImageError, this)
             );
             this.imageReloadAttempts = 0;
-            this.setImgSrc(this.url);
+            if(this.imgDiv.className != "olTileImage olImageLoadError"){  this.setImgSrc(this.url); }
         }
     },
     
@@ -16186,8 +16224,13 @@ OpenLayers.Tile.Image = OpenLayers.Class(OpenLayers.Tile, {
      * url - {String} or undefined to hide the image
      */
     setImgSrc: function(url) {
-        var img = this.imgDiv;
-        if (url) {
+       var img = this.imgDiv;
+ 
+//       var chkimg = new Image();
+//       chkimg.src = url;
+//       if( chkimg.height == 0 ){ url="" }; 
+
+       if (url) {
             img.style.visibility = 'hidden';
             img.style.opacity = 0;
             // don't set crossOrigin if the url is a data URL
@@ -37228,3 +37271,14 @@ OpenLayers.Control.LayerSwitcher = OpenLayers.Class(OpenLayers.Control, {
 
     CLASS_NAME: "OpenLayers.Control.LayerSwitcher"
 });
+
+
+function fileExists(url)
+{
+       var img = new Image();
+       img.src = url;
+       img.onload = function() { return true; };
+       img.onerror = function() { return false;};
+       img.src = url;
+
+}

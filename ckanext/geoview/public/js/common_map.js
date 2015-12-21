@@ -32,7 +32,8 @@
       var mapConfig = mapConfig || {type: 'mapquest'};
       var leafletMapOptions = leafletMapOptions || {};
       var leafletBaseLayerOptions = jQuery.extend(leafletBaseLayerOptions, {
-                maxZoom: 18
+             minZoom: 2,                
+             maxZoom: 18
                 });
 
       map = new L.Map(container, leafletMapOptions);
@@ -64,8 +65,27 @@
           leafletBaseLayerOptions.attribution = mapConfig.attribution || 'Map data &copy; OpenStreetMap contributors, Tiles Courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="//developer.mapquest.com/content/osm/mq_logo.png">';
       }
 
-      var baseLayer = new L.TileLayer(baseLayerUrl, leafletBaseLayerOptions);
+      var baseLayer = new L.TileLayer.Grayscale(baseLayerUrl, leafletBaseLayerOptions);
+//      var baseLayer = new L.TileLayer(baseLayerUrl, leafletBaseLayerOptions);
       map.addLayer(baseLayer);
+
+      var std = L.tileLayer('http://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png',{id: 'std', attribution: "<a href='http://portal.cyberjapan.jp/help/termsofuse.html' target='_blank'>国土地理院</a>",minZoom: 2,maxZoom: 18}),
+      pale = L.tileLayer('http://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png',{id: 'pale', attribution: "<a href='http://portal.cyberjapan.jp/help/termsofuse.html' target='_blank'>国土地理院</a>",minZoom: 2,maxZoom: 18}),
+      ort = L.tileLayer('http://cyberjapandata.gsi.go.jp/xyz/ort/{z}/{x}/{y}.png',{id: 'ort', attribution: "<a href='http://portal.cyberjapan.jp/help/termsofuse.html' target='_blank'>国土地理院</a>",minZoom: 2,maxZoom: 18}),
+      relief = L.tileLayer('http://cyberjapandata.gsi.go.jp/xyz/relief/{z}/{x}/{y}.png',{id: 'relief', attribution: "<a href='http://portal.cyberjapan.jp/help/termsofuse.html' target='_blank'>国土地理院</a>",minZoom: 5,maxZoom: 15}),
+      osm = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{ id: 'osmmap', attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors' });
+      var toner = new L.StamenTileLayer("toner", {'name': 'maps.stamen.com toner', id: 'toner'});
+
+      var baseMaps = {
+        "地理院地図（グレー）" : baseLayer,
+        "地理院地図（カラー）": std,
+        "地理院地図（淡色）": pale,
+        "国土地理院 航空写真": ort,
+        "国土地理院 色別標高図": relief,
+        "OpenStreetMap": osm,
+        "Toner": toner
+      };
+      L.control.layers(baseMaps).addTo(map);
 
       return map;
 

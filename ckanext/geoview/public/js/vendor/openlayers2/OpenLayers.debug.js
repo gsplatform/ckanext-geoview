@@ -84447,7 +84447,7 @@ OpenLayers.Control.LayerSwitcher = OpenLayers.Class(OpenLayers.Control, {
         OpenLayers.Element.addClass(this.layersDiv, "layersDiv");
 
         this.baseLbl = document.createElement("div");
-        this.baseLbl.innerHTML = OpenLayers.i18n("Base Layer");
+        this.baseLbl.innerHTML = OpenLayers.i18n("BaseLayer");
         OpenLayers.Element.addClass(this.baseLbl, "baseLbl");
 
         this.baseLayersDiv = document.createElement("div");
