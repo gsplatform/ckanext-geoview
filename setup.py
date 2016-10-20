@@ -9,10 +9,10 @@ setup(
     long_description=''' ''',
     classifiers=[],
     keywords='',
-    author='Philippe Duchesne',
-    author_email='pduchesne@gmail.com',
-    url='http://github.com/ckan/ckanext-geoview',
-    license='MIT',
+    author='Yoichi Kayama',
+    author_email='yoichi.kayama@gmail.com',
+    url='http://www.infolocal.jp/ckan2/',
+    license='AGPL',
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
     namespace_packages=['ckanext', 'ckanext.geoview'],
     include_package_data=True,
@@ -28,5 +28,6 @@ setup(
     geojson_preview=ckanext.geoview.plugin:GeoJSONPreview
     wmts_view=ckanext.geoview.plugin:WMTSView
     wmts_preview=ckanext.geoview.plugin:WMTSPreview
+    leaflet_view=ckanext.geoview.plugin:LeafletView
     ''',
 )

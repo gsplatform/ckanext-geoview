@@ -336,8 +336,8 @@
                                     }
                                     });
 
-                var baseMapLayer6 = new OpenLayers.Layer.Stamen("toner");
-                var baseMapLayer7 = new OpenLayers.Layer.OSM();
+//                var baseMapLayer6 = new OpenLayers.Layer.Stamen("toner");
+//                var baseMapLayer7 = new OpenLayers.Layer.OSM();
 
                 var mapDiv = $("<div></div>").attr("id", "map").addClass("map")
                 var info = $("<div></div>").attr("id", "info")
@@ -358,7 +358,8 @@
                         div: "map",
                         theme: "/s1/ckan/js/vendor/openlayers2/theme/default/style.css",
                     //    layers: [baseMapLayer, clearBaseLayer],
-                        layers: [baseMapLayer,clearBaseLayer ,baseMapLayer2, baseMapLayer3, baseMapLayer4, baseMapLayer5, baseMapLayer6, baseMapLayer7],
+                        layers: [baseMapLayer,clearBaseLayer ,baseMapLayer2, baseMapLayer3, baseMapLayer4, baseMapLayer5],
+                    //    layers: [baseMapLayer,clearBaseLayer ,baseMapLayer2, baseMapLayer3, baseMapLayer4, baseMapLayer5, baseMapLayer6, baseMapLayer7],
                         maxExtent: baseMapLayer.getMaxExtent()
                         //projection: Mercator, // this is needed for WMS layers (most only accept 3857), but causes WFS to fail
                     });

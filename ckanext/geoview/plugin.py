@@ -126,24 +126,6 @@ class OLGeoView(GeoViewBase):
             return can_preview_from_domain
         return False
 
-#        format_lower = data_dict['resource'].get('format', '').lower()
-#        same_domain = on_same_domain(data_dict)
-#
-#        # Guess from file extension
-#        if not format_lower and data_dict['resource'].get('url'):
-#            format_lower = self._guess_format_from_extension(
-#                data_dict['resource']['url'])
-#
-#        view_formats = config.get('ckanext.geoview.ol_viewer.formats', '')
-#        if view_formats:
-#            view_formats.split(' ')
-#        else:
-#            view_formats = GEOVIEW_FORMATS
-#
-#        correct_format = format_lower in view_formats
-#        can_preview_from_domain = self.proxy_enabled or same_domain
-#
-#        return correct_format and can_preview_from_domain
 
     def view_template(self, context, data_dict):
         return 'dataviewer/openlayers2.html'
@@ -275,6 +257,48 @@ class GeoJSONView(GeoViewBase):
 class GeoJSONPreview(GeoJSONView):
     pass
 
+
+class LeafletView(GeoViewBase):
+    p.implements(p.ITemplateHelpers, inherit=True)
+
+    FORMATS = ['wms', 'kml', 'gjson', 'geojson']
+
+    # IResourceView (CKAN >=2.3)
+    def info(self):
+        return {'name': 'leaflet_view',
+                'title': 'Leaflet View',
+                'icon': 'map-marker',
+                'iframed': True,
+                'default_title': p.toolkit._('Preview'),
+                }
+
+    def can_view(self, data_dict):
+
+        resource = data_dict['resource']
+        format_lower = resource.get('format', '').lower()
+
+        if format_lower in self.FORMATS:
+            return self.same_domain or self.proxy_enabled
+        return False
+
+    def view_template(self, context, data_dict):
+        return 'dataviewer/leaflet.html'
+
+    def setup_template_variables(self, context, data_dict):
+        import ckanext.resourceproxy.plugin as proxy
+        self.same_domain = data_dict['resource'].get('on_same_domain')
+        if self.proxy_enabled and not self.same_domain:
+            data_dict['resource']['original_url'] = \
+                data_dict['resource'].get('url')
+            data_dict['resource']['url'] = \
+                proxy.get_proxified_resource_url(data_dict)
+
+    # ITemplateHelpers
+
+    def get_helpers(self):
+        return {
+            'get_common_map_config_leaflet': get_common_map_config,
+        }
 
 class WMTSView(GeoViewBase):
     p.implements(p.ITemplateHelpers, inherit=True)

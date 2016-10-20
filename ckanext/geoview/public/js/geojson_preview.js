@@ -30,7 +30,7 @@ ckan.module('geojsonpreview', function (jQuery, _) {
       .fail(
         function(jqXHR, textStatus, errorThrown) {
           self.showError(jqXHR, textStatus, errorThrown);
-        }
+       }
       );
     },
 
