@@ -50,7 +50,8 @@ ckan.module('leafletpreview', function (jQuery, _) {
 
            $.ajax({
              type: 'POST',
-             url: '/top/php/getlayers.php', 
+               url: '/top/php/getlayers.php', 
+ //            url: this.options.site_url + 'js/php/getlayers.php',
              data: {'url': preload_resource['original_url'] },
              success: function(res) {
                if (res.error) {
