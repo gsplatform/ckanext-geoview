@@ -82,14 +82,39 @@ ckan.module('leafletpreview', function (jQuery, _) {
                   }
                   L.control.layers(map.baseMaps,overmaps).addTo(map);
                }
-           },
-           error: function(res) {
-              $("#warning-contents").html("サーバとの通信に失敗しました");
-           }
-         });
+             },
+             error: function(res) {
+               $("#warning-contents").html("サーバとの通信に失敗しました");
+             }
+           });
 
-         self.map.setView(latlng,11);
-         break;
+           self.map.setView(latlng,11);
+           break;
+
+         case "SHP":
+         case "ZIP":
+           var shpfile = new L.Shapefile(preload_resource['url'], {
+              onEachFeature: function(feature, layer) {
+                if (feature.properties) {
+                  layer.bindPopup(Object.keys(feature.properties).map(function(k) {
+                    return k + ": " + feature.properties[k];
+                  }).join("<br />"), {
+                    maxHeight: 200
+                  });
+                }
+              }
+           });
+           shpfile.addTo(map);
+           L.control.layers(map.baseMaps).addTo(map);
+           map.setView([36, 135.5], 5);
+           //self.map.fitBounds(shpfile.getBounds());
+           shpfile.once("data:loaded", function() {
+             console.log("finished loaded shapefile");
+           });
+
+           break;
+
+
       }
     
     },

@@ -261,7 +261,7 @@ class GeoJSONPreview(GeoJSONView):
 class LeafletView(GeoViewBase):
     p.implements(p.ITemplateHelpers, inherit=True)
 
-    FORMATS = ['wms', 'kml', 'gjson', 'geojson']
+    FORMATS = ['wms', 'kml', 'gjson', 'geojson', 'shp', 'zip']
 
     # IResourceView (CKAN >=2.3)
     def info(self):
